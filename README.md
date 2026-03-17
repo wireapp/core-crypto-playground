@@ -47,5 +47,5 @@ All `@wireapp/core-crypto` interactions are encapsulated in `CoreCryptoWrapper.t
 
 ## Dependencies
 
-- [`@wireapp/core-crypto@9.0.0`](https://www.npmjs.com/package/@wireapp/core-crypto) — Wire MLS/Proteus E2E encryption SDK (WASM)
+- [`@wireapp/core-crypto@9.3.0`](https://www.npmjs.com/package/@wireapp/core-crypto) — Wire MLS/Proteus E2E encryption SDK (WASM)
 - React 19, Vite, TypeScript
