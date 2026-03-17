@@ -23,6 +23,13 @@ import {
 const USER_ID = "LcksJb74Tm6N12cDjFy7lQ:8e6424430d3b28be@world.com";
 
 let instance: CoreCrypto | null = null;
+let instancePromise: Promise<CoreCrypto> | null = null;
+let conversationDemoPromise: Promise<ConversationDemoResult> | null = null;
+
+export interface ConversationDemoResult {
+  conversationExists: boolean;
+  identities: WireIdentity[];
+}
 
 /**
  * Returns the singleton `CoreCrypto` instance.
@@ -30,18 +37,31 @@ let instance: CoreCrypto | null = null;
  * subsequent calls return the cached instance immediately.
  */
 export async function getCoreCryptoInstance(): Promise<CoreCrypto> {
-  if (instance) return instance;
+  if (instance) {
+    return instance;
+  }
 
-  await initWasmModule("/");
-  const clientId = new ClientId(new TextEncoder().encode(USER_ID));
-  instance = await CoreCrypto.init({
-    ciphersuites: [Ciphersuite.MLS_128_DHKEMP256_AES128GCM_SHA256_P256],
-    clientId,
-    databaseName: "test-database",
-    key: new DatabaseKey(crypto.getRandomValues(new Uint8Array(32))),
-  });
+  if (!instancePromise) {
+    try {
+      instancePromise = (async () => {
+        await initWasmModule("/");
+        const clientId = new ClientId(new TextEncoder().encode(USER_ID));
+        const createdInstance = await CoreCrypto.init({
+          ciphersuites: [Ciphersuite.MLS_128_DHKEMP256_AES128GCM_SHA256_P256],
+          clientId,
+          databaseName: "test-database",
+          key: new DatabaseKey(crypto.getRandomValues(new Uint8Array(32))),
+        });
+        instance = createdInstance;
+        return createdInstance;
+      })()
+    } catch (error: unknown) {
+      instancePromise = null;
+      throw error;
+    }
+  }
 
-  return instance;
+  return instancePromise;
 }
 
 /**
@@ -69,6 +89,35 @@ export async function createConversationAndGetIdentities(
   });
   console.log("Transaction result:", result);
   return Array.from(result.values()).flat();
+}
+
+/**
+ * Runs the demo flow exactly once so React Strict Mode in development does
+ * not re-enter the CoreCrypto bootstrap sequence.
+ */
+export async function loadConversationDemo(): Promise<ConversationDemoResult> {
+  if (!conversationDemoPromise) {
+    try {
+      conversationDemoPromise = (async () => {
+        const conversationId = await createConversationID();
+        const conversationExists = await checkConversationExists(conversationId);
+        const identities = await createConversationAndGetIdentities(
+          conversationId,
+        );
+
+        return {
+          conversationExists,
+          identities,
+        };
+      })()
+    }
+    catch (error: unknown) {
+      conversationDemoPromise = null;
+      throw error;
+    };
+  }
+
+  return conversationDemoPromise;
 }
 
 /**

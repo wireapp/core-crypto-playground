@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { WireIdentity } from "@wireapp/core-crypto";
 import {
-  checkConversationExists,
-  createConversationAndGetIdentities,
-  createConversationID,
+  loadConversationDemo,
 } from "./CoreCryptoWrapper";
 
 function App() {
@@ -12,15 +10,16 @@ function App() {
   const [wireIdentities, setWireIdentities] = useState<WireIdentity[]>([]);
 
   useEffect(() => {
-    const initialize = async () => {
-      const conversationId = await createConversationID();
-      try {
-        const conversationExists =
-          await checkConversationExists(conversationId);
-        setIsConversationExists(conversationExists);
+    let isActive = true;
 
-        const identities =
-          await createConversationAndGetIdentities(conversationId);
+    const initialize = async () => {
+      try {
+        const { conversationExists, identities } = await loadConversationDemo();
+        if (!isActive) {
+          return;
+        }
+
+        setIsConversationExists(conversationExists);
         setWireIdentities(identities);
       } catch (error) {
         console.error("Error during transaction:", error);
@@ -28,6 +27,10 @@ function App() {
     };
 
     initialize();
+
+    return () => {
+      isActive = false;
+    };
   }, []);
 
   return (
