@@ -11,7 +11,7 @@ npm run dev
 
 The app is served at `http://localhost:5173`.
 
-> **Note:** The WASM binary (`core-crypto-ffi_bg.wasm`) must be served from the root `/`. Vite is configured to copy it to `public/` automatically.
+> **Note:** The WASM binary (`core-crypto-ffi_bg.wasm`) must be served from the root `/`. Vite synchronizes the installed package binary into `public/` automatically.
 
 ## Project Structure
 
