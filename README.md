@@ -1,4 +1,4 @@
-# my-app — Wire CoreCrypto Playground
+# Wire CoreCrypto Playground
 
 A minimal React + TypeScript + Vite app for exploring the [`@wireapp/core-crypto`](https://github.com/wireapp/core-crypto) WebAssembly library. It demonstrates MLS (Messaging Layer Security) conversation creation and identity resolution using the Wire end-to-end encryption SDK.
 
